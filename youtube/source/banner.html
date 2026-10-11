@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<!--
+  YouTube channel banner source, rendered to PNG by render.mjs.
+  Canvas: 2560 x 1440. Everything that must be readable sits inside the
+  1546 x 423 safe area (x 507-2053, y 508-931), which is all a phone shows.
+  Desktop shows the full-width 2560 x 423 strip; TVs show the whole canvas.
+  Variant is picked with ?v=signal (default) or ?v=verdict.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Facts Not Vibes banner</title>
+<style>
+  :root {
+    --ink: #070a14;
+    --navy: #111a33;
+    --white: #f5f7fb;
+    --muted: #8d9bbd;
+    --coral: #ff5d5d;
+    --cyan: #4fd6ff;
+    --violet: #8b7bff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 2560px; height: 1440px; overflow: hidden; background: var(--ink); }
+  body { font-family: "Inter", sans-serif; color: var(--white); position: relative; }
+
+  .bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(900px 520px at 14% 50%, rgba(255, 93, 93, 0.20), transparent 70%),
+      radial-gradient(1000px 620px at 88% 48%, rgba(79, 214, 255, 0.18), transparent 70%),
+      radial-gradient(1400px 700px at 50% 50%, #142046 0%, var(--ink) 75%);
+  }
+  .grid {
+    position: absolute; inset: 0; opacity: 0.07;
+    background-image:
+      linear-gradient(var(--white) 1px, transparent 1px),
+      linear-gradient(90deg, var(--white) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(1300px 520px at 50% 50%, #000 30%, transparent 75%);
+  }
+  svg.layer { position: absolute; inset: 0; }
+
+  /* Safe area: content block centered on the canvas */
+  .safe {
+    position: absolute; left: 507px; top: 508px; width: 1546px; height: 423px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 25px; letter-spacing: 0.32em;
+    color: var(--muted); text-transform: uppercase; display: flex; gap: 28px; align-items: center;
+  }
+  .eyebrow .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-right: 12px; vertical-align: 1px; }
+  .title {
+    font-family: "Inter Display", "Inter", sans-serif; font-weight: 900;
+    font-size: 156px; line-height: 0.95; letter-spacing: -0.035em; margin-top: 20px;
+  }
+  .title .not { font-weight: 300; font-style: italic; color: var(--muted); letter-spacing: -0.02em; margin: 0 0.06em; }
+  .title .vibes { position: relative; color: #6e7a99; }
+  .title .vibes::after {
+    content: ""; position: absolute; left: -3%; right: -3%; top: 52%; height: 16px;
+    background: var(--coral); border-radius: 8px; transform: rotate(-4deg);
+    box-shadow: 0 0 30px rgba(255, 93, 93, 0.55);
+  }
+  .tagline { font-size: 38px; font-weight: 500; color: #d6ddee; margin-top: 26px; letter-spacing: -0.01em; }
+  .tagline b { color: var(--white); font-weight: 700; }
+  .chips { display: flex; gap: 18px; margin-top: 30px; }
+  .chip {
+    font-size: 25px; font-weight: 600; padding: 12px 24px; border-radius: 999px;
+    border: 2px solid rgba(245, 247, 251, 0.18); background: rgba(245, 247, 251, 0.05);
+    color: #e3e8f4; display: flex; align-items: center; gap: 12px;
+  }
+  .chip i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+  /* Verdict variant: myth cards flank the safe area (desktop / TV only) */
+  .card {
+    position: absolute; top: 560px; width: 420px; padding: 30px 34px; border-radius: 26px;
+    background: rgba(17, 26, 51, 0.82); border: 2px solid rgba(245, 247, 251, 0.12);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); text-align: left;
+  }
+  .card .label { font-family: "DejaVu Sans Mono", monospace; font-size: 20px; letter-spacing: 0.25em; color: var(--muted); }
+  .card .claim { font-size: 33px; font-weight: 700; line-height: 1.2; margin-top: 14px; color: var(--white); }
+  .card .stamp {
+    display: inline-block; margin-top: 22px; font-family: "Inter Display", sans-serif; font-weight: 900;
+    font-size: 34px; letter-spacing: 0.12em; padding: 6px 20px; border: 4px solid var(--coral);
+    color: var(--coral); border-radius: 10px; transform: rotate(-6deg);
+  }
+  .card .src { font-family: "DejaVu Sans Mono", monospace; font-size: 19px; color: var(--muted); margin-top: 20px; }
+  .card.left { left: 52px; transform: rotate(-3deg); }
+  .card.right { right: 52px; transform: rotate(3deg); }
+  .card.right .stamp { border-color: var(--cyan); color: var(--cyan); }
+
+  [data-only] { display: none; }
+  body.signal [data-only~="signal"], body.verdict [data-only~="verdict"] { display: revert; }
+  body.signal .card, body.verdict svg[data-only~="signal"] { display: none; }
+  body.verdict .card { display: block; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="grid"></div>
+<svg class="layer" id="stars" width="2560" height="1440" viewBox="0 0 2560 1440"></svg>
+
+<!-- Signal variant art: a heartbeat on the left (health), an orbit on the right (space) -->
+<svg class="layer" data-only="signal" width="2560" height="1440" viewBox="0 0 2560 1440">
+  <defs>
+    <linearGradient id="ecg" x1="0" x2="1">
+      <stop offset="0" stop-color="#ff5d5d" stop-opacity="0"/>
+      <stop offset="0.25" stop-color="#ff5d5d"/>
+      <stop offset="1" stop-color="#ff5d5d" stop-opacity="0.9"/>
+    </linearGradient>
+    <radialGradient id="planet" cx="0.35" cy="0.32" r="0.8">
+      <stop offset="0" stop-color="#9fe9ff"/>
+      <stop offset="0.45" stop-color="#3a8fd9"/>
+      <stop offset="1" stop-color="#1b2a6b"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Heartbeat trace -->
+  <path id="ecgPath" fill="none" stroke="url(#ecg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="470" cy="720" r="11" fill="#ff5d5d" filter="url(#glow)"/>
+
+  <!-- Planet with orbit -->
+  <g transform="translate(2290 720)">
+    <ellipse rx="230" ry="74" fill="none" stroke="#4fd6ff" stroke-opacity="0.35" stroke-width="4" transform="rotate(-16)" stroke-dasharray="2 0"/>
+    <circle r="112" fill="url(#planet)"/>
+    <ellipse rx="230" ry="74" fill="none" stroke="#4fd6ff" stroke-width="5" transform="rotate(-16)"
+             stroke-dasharray="380 1200" stroke-dashoffset="-40" filter="url(#glow)"/>
+    <circle cx="-196" cy="22" r="11" fill="#f5f7fb" filter="url(#glow)"/>
+  </g>
+  <g transform="translate(2130 560)" opacity="0.9">
+    <circle r="26" fill="#8b7bff" opacity="0.85"/>
+    <circle r="26" fill="none" stroke="#c9c1ff" stroke-width="2" opacity="0.6"/>
+  </g>
+</svg>
+
+<div class="card left">
+  <div class="label">HEALTH MYTH</div>
+  <div class="claim">“You only use 10% of your brain.”</div>
+  <div class="stamp">FALSE</div>
+  <div class="src">checked against: brain-imaging research</div>
+</div>
+<div class="card right">
+  <div class="label">SPACE MYTH</div>
+  <div class="claim">“You can see the Great Wall from the Moon.”</div>
+  <div class="stamp">FALSE</div>
+  <div class="src">checked against: NASA</div>
+</div>
+
+<div class="safe">
+  <div class="eyebrow">
+    <span><span class="dot" style="background:var(--coral)"></span>Health</span>
+    <span><span class="dot" style="background:var(--cyan)"></span>Space</span>
+    <span><span class="dot" style="background:var(--violet)"></span>Sourced</span>
+  </div>
+  <div class="title">Facts <span class="not">not</span> <span class="vibes">vibes</span></div>
+  <div class="tagline" data-only="signal">The internet's favorite myths about <b>your body</b> and <b>the universe</b>, fact-checked.</div>
+  <div class="tagline" data-only="verdict">You've heard the myth. <b>Here's what the evidence actually says.</b></div>
+  <div class="chips">
+    <div class="chip"><i style="background:var(--coral)"></i>Every source shown on screen</div>
+    <div class="chip"><i style="background:var(--cyan)"></i>NASA · ESA · peer-reviewed journals</div>
+    <div class="chip"><i style="background:var(--violet)"></i>Zero hot takes</div>
+  </div>
+</div>
+
+<script>
+  const v = new URLSearchParams(location.search).get("v") || "signal";
+  document.body.classList.add(v);
+
+  // Deterministic starfield, denser toward the right (space side).
+  let seed = 7;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const stars = document.getElementById("stars");
+  let out = "";
+  for (let i = 0; i < 520; i++) {
+    const x = Math.pow(rand(), 0.7) * 2560;
+    const y = rand() * 1440;
+    const r = rand() < 0.08 ? 2.6 : rand() * 1.5 + 0.4;
+    const o = (0.25 + rand() * 0.6) * (0.35 + 0.65 * (x / 2560));
+    out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(2)}" fill="#f5f7fb" opacity="${o.toFixed(2)}"/>`;
+  }
+  stars.innerHTML = out;
+
+  // Heartbeat: flat baseline with PQRST complexes, ending in a dot at x=470, just outside the phone crop.
+  const p = document.getElementById("ecgPath");
+  if (p) {
+    const y0 = 720;
+    let d = `M -20 ${y0}`;
+    for (let x = 40; x < 300; x += 190) {
+      d += ` L ${x} ${y0} q 12 -16 24 0 L ${x + 44} ${y0} l 10 18 l 16 -118 l 18 150 l 12 -50 L ${x + 120} ${y0} q 18 -26 36 0`;
+    }
+    d += ` L 470 ${y0}`;
+    p.setAttribute("d", d);
+  }
+</script>
+</body>
+</html>
